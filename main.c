@@ -10,13 +10,13 @@
  * @ Date: 15/04/2021
 */
 
-/* PROTOTYPING */ 
-
 /* GLOBAL */
-
+static int channelStrengthMean;
+static process_event_t channelMeasuringEvent;
 
 /*-----------------------------------------------------------*/
 PROCESS(signalDataCompression, "data compression using discrete cosine transform (DCT)");
+PROCESS(mesureBestChannel, "Process for measuring the best channel strength");
 PROCESS(turnOnRadio, "Print output");
 AUTOSTART_PROCESSES(&signalDataCompression);
 /*-----------------------------------------------------------*/
@@ -24,45 +24,58 @@ AUTOSTART_PROCESSES(&signalDataCompression);
 PROCESS_THREAD(signalDataCompression, ev, data)
 {
     PROCESS_BEGIN();
-    process_start(&turnOnRadio, NULL); //<--- Change value here (256/512)
+    process_start(&turnOnRadio, NULL);
     PROCESS_END();
 }
 
-
 PROCESS_THREAD(turnOnRadio, ev, data)
 {
+    static int currentChannel = 0;
+    static int bestChannelStrength = -90;
+    static int bestChannel = 11;
     PROCESS_BEGIN();
-    cc2420_init();
-    cc2420_on();            // Turn on radio
+    cc2420_init(); // init radio
+    channelMeasuringEvent = process_alloc_event();
 
-
-    int bestChannelStrength = -90;
-    while(1){
-        int fetchedChannelStrength = cc2420_rssi();
-        // int P = fetchedChannelStrength + RSSI_OFFSET;
-        if(fetchedChannelStrength < bestChannelStrength){
-            bestChannelStrength = fetchedChannelStrength;
+    for (currentChannel = 11; currentChannel <= 26; currentChannel++)
+    {
+        process_start(&mesureBestChannel, &currentChannel);
+        PROCESS_WAIT_EVENT_UNTIL(ev == channelMeasuringEvent);
+        printf("Measured mean strength, from channel: %d, with value: %d \n", currentChannel, channelStrengthMean);
+        if (channelStrengthMean > bestChannelStrength)
+        {
+            bestChannelStrength = channelStrengthMean;
+            bestChannel = currentChannel;
         }
-        printf("Best channel strength: %d\n", bestChannelStrength);
     }
-    u_int8_t i;
+    printf("Best measured channel strength: %d\n", bestChannelStrength);
+    printf("Best channel by strength: %d\n", bestChannel);
+    cc2420_set_channel(bestChannel);
+    PROCESS_END();
+}
 
-    for(i = 11; i < 26; i++){
-        int fetchedChannelStrength = cc2420_rssi();
-        // int P = fetchedChannelStrength + RSSI_OFFSET;
-        if(fetchedChannelStrength < bestChannelStrength){
-            bestChannelStrength = fetchedChannelStrength;
-        }
-        printf("Best channel strength: %d\n", bestChannelStrength);
+PROCESS_THREAD(mesureBestChannel, ev, data)
+{
+    static struct timer timer;
+
+    PROCESS_BEGIN();
+
+    int counter = 0;
+    int ChannelStrength = 0;
+    cc2420_on(); // Turn on radio
+    cc2420_set_channel(*((int*)data));
+
+    int i;
+    for(i = 0; i < 10; i++){
+        ChannelStrength = ChannelStrength + cc2420_rssi();
+        timer_set(&timer, CLOCK_SECOND * 1);
+        timer_reset(&timer);
+        counter++;
     }
-    
-    cc2420_set_channel(bestChannelStrength);
-    int currentRSSI = cc2420_rssi();
 
-    /* convert the RSSI register value to the RSSI value in dBm */
-    int P = currentRSSI + RSSI_OFFSET;
-    printf("Current RSSI: %d \n", currentRSSI);
-    printf("RSSI value in dBm: %d \n", P);
+    channelStrengthMean = ChannelStrength / counter;
+    cc2420_off(); // Turn off radio
 
+    process_post(&turnOnRadio, channelMeasuringEvent, NULL);
     PROCESS_END();
 }
