@@ -52,7 +52,7 @@ PROCESS_THREAD(mainProcess, ev, data)
     {
         process_start(&measureBestChannel, &currentChannel);
         PROCESS_WAIT_EVENT_UNTIL(ev == channelMeasuringEvent);
-        printf("Measured mean strength, from channel: %d, with value: %d\n", currentChannel, channelStrengthMean);
+        printf("Measured mean strength, from channel: %d, with value: %d dBm\n", currentChannel, channelStrengthMean);
         if (channelStrengthMean > bestChannelStrength)
         {
             bestChannelStrength = channelStrengthMean;
@@ -61,6 +61,7 @@ PROCESS_THREAD(mainProcess, ev, data)
     }
     printf("Best measured channel strength: %d\n", bestChannelStrength);
     printf("Best channel by strength: %d\n", bestChannel);
+    printf("Switching to channel: %d\n", bestChannel);
     cc2420_set_channel(bestChannel);
     PROCESS_END();
 }
