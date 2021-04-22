@@ -10,7 +10,7 @@ The following steps should be completed using a sensor node:
     
 2. Compare noise/inference status at different channels and select the best channel.
 <p align="center">
-  <img src="images/frequencyBand.png" height="450">
+  <img src="images/frequencyBand.png" height="400">
 </p>
 
 ## Compiling and uploading the program
