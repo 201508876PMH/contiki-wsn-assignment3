@@ -34,7 +34,7 @@ Tabel fetched from: https://www.metageek.com/training/resources/wifi-signal-stre
 | -90 dBm | Unusable | Approaching or drowning in the noise floor. Any functionality is highly unlikely. | N/A |
 
 ### Result
-Looking at the console dump below, we see the mote trying the channels between 11 and 26. Where the best channel was found to be 12, with a dBm value of -57.
+Looking at the console dump below, we see the mote trying the channels between 11 and 26. Where the best channel was found to be 25, with a dBm value of -74.
 <p align="center">
   <img src="images/moteDump.png" height="600">
 </p>
