@@ -34,7 +34,8 @@ Tabel fetched from: https://www.metageek.com/training/resources/wifi-signal-stre
 | -90 dBm | Unusable | Approaching or drowning in the noise floor. Any functionality is highly unlikely. | N/A |
 
 ### Result
-Looking at the console dump below, we see the mote trying the channels between 11 and 26. Where the best channel was found to be 25, with a dBm value of -74.
+Looking at the console dump below, we see the mote trying the channels between 11 and 26. Where the best channel was found to be 25, with a dBm value of -74. The formula for finding this is given by `P = RSSI_VAL + RSSI_OFFSET`, where the offset(often -45) has already been applied in the `cc2420.c` included library.
+
 <p align="center">
   <img src="images/moteDump.png" height="600">
 </p>
