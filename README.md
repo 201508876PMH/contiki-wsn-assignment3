@@ -24,6 +24,17 @@ make TARGET=sky PORT=/dev/ttyUSB0 main.upload login
 ```
 
 ## Console dump from Telos B. mote
+Tabel fetched from: https://www.metageek.com/training/resources/wifi-signal-strength-basics.html. 
+| Signal Strength | TL;DR |  | Required for |
+| --- | --- | --- | --- |
+| -30 dBm | Amazing | Max achievable signal strength. The client can only be a few feet from the AP to achieve this. Not typical or desirable in the real world. | N/A |
+| -67 dBm | Very Good | Minimum signal strength for applications that require very reliable, timely delivery of data packets. | VoIP/VoWiFi, streaming video. |
+| -70 dBm | Okay | Minimum signal strength for reliable packet delivery. | Email, web |
+| -80 dBm | Not Good | Minimum signal strength for basic connectivity. Packet delivery may be unreliable. | N/A |
+| -90 dBm | Unusable | Approaching or drowning in the noise floor. Any functionality is highly unlikely. | N/A |
+
+### Result
+Looking at the console dump below, we see the mote trying the channels between 11 and 26. Where the best channel was found to be 12, with a dBm value of -57.
 <p align="center">
   <img src="images/moteDump.png" height="600">
 </p>
